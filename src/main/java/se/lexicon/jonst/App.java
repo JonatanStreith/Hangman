@@ -61,7 +61,7 @@ public class App {
             }
 
         } while (askUserFor("\n\nDo you want to play again? (y/n) [n] ").toLowerCase().equals("y") ? true : false); //Ask user, then use response to decide ternary operator
-
+                                                                                                                          //Pretty cool, using ternary as a boolean statement
         System.out.println("\nThanks for playing!");
 
         inputReader.close();
