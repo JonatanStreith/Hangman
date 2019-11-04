@@ -20,8 +20,6 @@ public class App {
 
     public static void main(String[] args) {
 
-        boolean playAgain = false;
-
         inputReader = new Scanner(System.in);
 
         String guess;       //Stores a guess
@@ -50,8 +48,6 @@ public class App {
                 answerFound();
 
 
-
-
                 if (guessedRight) {
                     System.out.print("That's right! The secret word is \"" + secretWord + "\"! You've won with only " + guesses.length() + " letter guesses and " + fullWordGuess + " full word guesses!");
                     break;
@@ -64,19 +60,20 @@ public class App {
 
             }
 
-            if (askUserFor("\n\nDo you want to play again? (y/n) [n] ").toLowerCase().equals("y")) {
-                playAgain = true;
-            } else {
-                playAgain = false;
-            }
-
-
-        } while (playAgain);
+        } while (askUserFor("\n\nDo you want to play again? (y/n) [n] ").toLowerCase().equals("y") ? true : false); //Ask user, then use response to decide ternary operator
 
         System.out.println("\nThanks for playing!");
 
         inputReader.close();
     }
+
+
+
+
+
+
+
+
 
     public static String getRandomSecret() {        //Picks a word from the SECRETWORDS array
         return SECRETWORDS[(int) Math.floor(Math.random() * SECRETWORDS.length)];
@@ -150,17 +147,16 @@ public class App {
 
         }
 
-        for (String[] row: stickman(wrongGuesses)   //Write the stickman
+        for (String[] row : stickman(wrongGuesses)   //Write the stickman
         ) {
-            for (String part: row
-                 ) {
+            for (String part : row
+            ) {
                 System.out.print(part);
             }
             System.out.print("\n");
         }
 
         System.out.println("\n");
-
 
 
     }
@@ -179,13 +175,6 @@ public class App {
     public static String[][] stickman(int parts) {
 
         switch (parts) {    //Breaks not needed because return
-            case 0:
-                return new String[][]{
-                        {" ", " ", " "},
-                        {" ", " ", " "},
-                        {" ", " ", " "},
-                        {" ", " ", " "}
-                };
             case 1:
                 return new String[][]{
                         {"(", " ", " "},
