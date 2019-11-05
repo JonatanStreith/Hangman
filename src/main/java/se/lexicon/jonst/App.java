@@ -7,16 +7,7 @@ public class App {
 
     public static Scanner inputReader;
 
-    public static final String[] SECRETWORDS = {"donkey", "cactus", "cowboy", "desert", "banana", "wrench", "exodus", "country", "tournament", "programmer", "sandstorm", "demolition"};
 
-    public static String secretWord;    //Stores the secret word
-    public static char[] guessWord;     //Stores the guess-word. Filled up with underscores initially.
-
-    public static StringBuilder guesses;     //Initiate a stringbuilder to keep guessed letters in
-
-    public static boolean guessedRight;     //Used to flag when you've guessed right and lead into loop exit
-    public static int wrongGuesses;     //Tracks number of wrong guesses
-    public static int fullWordGuess;
 
     public static void main(String[] args) {
 
@@ -24,33 +15,50 @@ public class App {
 
         String guess;       //Stores a guess
 
-
+        StringBuilder guesses;     //Initiate a stringbuilder to keep guessed letters in
         System.out.println("Let's play Hangman!\n\n\n");
 
 
         do {
 
 
-            secretWord = getRandomSecret();      //Get a randomly selected word from SECRETWORDS
-            guessWord = getBlankArray(secretWord.length());  //Get a blank array to store correct guesses in
-            guessedRight = false;
+            String secretWord = getRandomSecret();      //Get a randomly selected word from SECRETWORDS
+            char[] guessWord = getBlankArray(secretWord.length());  //Get a blank array to store correct guesses in
+            //guessedRight = false;
             guesses = new StringBuilder(8);
-            wrongGuesses = 0;
-            fullWordGuess = 0;
+            int wrongGuesses = 0;
+            int fullWordGuess = 0;
 
-            while (true) {
+            String testResult;
 
-                showResult();
+            boolean wordComplete;
+
+
+
+            do {
+
+                showResult(guesses, guessWord, wrongGuesses);
 
                 guess = askUserFor("Guess a word or letter: ");     //Get an input from user
-                testGuess(guess.toLowerCase());            //Test the guess
-
-                answerFound();
 
 
-                if (guessedRight) {
-                    System.out.print("That's right! The secret word is \"" + secretWord + "\"! You've won with only " + guesses.length() + " letter guesses and " + fullWordGuess + " full word guesses!");
+                testResult = testGuess(guess.toLowerCase(), guesses, secretWord, guessWord);            //Test the guess
+
+                wordComplete = answerFound(guessWord);
+
+                drawStickman(wrongGuesses);
+
+
+                if (wordComplete || testResult == "rightword") {
+                    System.out.print("That's right! The secret word is \"" + secretWord + "\"! You've won with only " + guesses.length() + " letter guesses and " + fullWordGuess + " wrong word guesses!");
                     break;
+                }
+                else if(testResult == "wrongchar"){
+                    wrongGuesses++;
+                }
+                else if(testResult == "wrongword"){
+                    wrongGuesses++;
+                    fullWordGuess++;
                 }
 
                 if (wrongGuesses >= 8) {
@@ -58,7 +66,7 @@ public class App {
                     break;
                 }
 
-            }
+            }while (true);
 
         } while (askUserFor("\n\nDo you want to play again? (y/n) [n] ").toLowerCase().equals("y") ? true : false); //Ask user, then use response to decide ternary operator
                                                                                                                           //Pretty cool, using ternary as a boolean statement
@@ -76,6 +84,8 @@ public class App {
 
 
     public static String getRandomSecret() {        //Picks a word from the SECRETWORDS array
+
+        final String[] SECRETWORDS = {"donkey", "cactus", "cowboy", "desert", "banana", "wrench", "exodus", "country", "tournament", "programmer", "sandstorm", "demolition"};
         return SECRETWORDS[(int) Math.floor(Math.random() * SECRETWORDS.length)];
     }
 
@@ -94,7 +104,7 @@ public class App {
         return blankArray;
     }
 
-    public static void showResult() {       //Shows what we've revealed of the guessed word so far
+    public static void showResult(StringBuilder guesses, char[] guessWord, int wrongGuesses) {       //Shows what we've revealed of the guessed word so far
         System.out.print("The word is: ");
         for (char letter : guessWord) {
             System.out.print(letter + " ");
@@ -103,15 +113,18 @@ public class App {
 
         System.out.println("Already guessed letters: " + guesses.toString());
         System.out.println("Wrong guesses so far: " + wrongGuesses + "\n\n");
+
+
     }
 
-    public static void testGuess(String response) {     //Tests whether the guess is right or wrong
+    public static String testGuess(String response, StringBuilder guesses, String secretWord, char[] guessWord) {     //Tests whether the guess is right or wrong
 
         if (response.length() == 1) {     //If it's just one letter
 
             if (guesses.toString().contains(response)) {
                 System.out.println("You've already guessed that letter!");
 
+                return "doublechar";
 
             } else if (secretWord.contains(response)) {        //If the letter is in the word
                 guesses.append(response);       //Add the guess to list of guessed letters
@@ -123,30 +136,50 @@ public class App {
                         guessWord[i] = response.charAt(0);
                     }
                 }
-
+                return "rightchar";
 
             } else {        //If you didn't guess right, and haven't guessed that yet
                 guesses.append(response);       //Add the guess to list of guessed letters
                 System.out.println("Wrong guess!");
-                wrongGuesses++;
 
+                return "wrongchar";
             }
 
         } else {           //If it's more than one, i.e. a word
 
-            fullWordGuess++;
-
             if (response.equals(secretWord)) {
                 System.out.println("You guessed correctly!");
-                guessedRight = true;
+
+                return "rightword";
 
             } else {
                 System.out.println("That's not the right word!");
-                wrongGuesses++;
+
+                return "wrongword";
             }
 
         }
 
+
+
+
+    }
+
+    public static boolean answerFound(char[] guessWord) {  //Checks if the answer has been found in full
+        boolean blanksFound = false;
+        for (char letter : guessWord) {      //Check if we still have blank spaces
+            if (letter == '_')
+                blanksFound = true;
+        }
+        if (!blanksFound)       //If we don't have any blank spaces, the word has been found!
+            return true;
+        else
+            return false;
+    }
+
+
+
+    public static void drawStickman(int wrongGuesses){
         for (String[] row : stickman(wrongGuesses)   //Write the stickman
         ) {
             for (String part : row
@@ -157,20 +190,7 @@ public class App {
         }
 
         System.out.println("\n");
-
-
     }
-
-    public static void answerFound() {  //Checks if the answer has been found in full
-        boolean blanksFound = false;
-        for (char letter : guessWord) {      //Check if we still have blank spaces
-            if (letter == '_')
-                blanksFound = true;
-        }
-        if (!blanksFound)       //If we don't have any blank spaces, the word has been found!
-            guessedRight = true;
-    }
-
 
     public static String[][] stickman(int parts) {
 
